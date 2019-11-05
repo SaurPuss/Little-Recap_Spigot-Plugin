@@ -1,0 +1,27 @@
+name: LittleRecap
+version: ${project.version}
+main: me.saurpuss.voxmc.littlerecap.LittleRecap
+api-version: 1.14.4
+prefix: RECAP
+author: SaurPuss
+description: Small /recap plugin to support 1.14.4 needs
+website: https://github.com/SaurPuss/Little-Recap_Spigot-Plugin
+
+commands:
+  recap:
+    description: Record or view a message for handover
+    usage: |
+      /<command> - Display the last 10 recap messages
+      /<command> [message...] - Add a new recap to the log
+      /<command> <reload> - Reload the LittleRecap config.yml
+    permission: recap.admin
+    permission-message: "§cYou don't have permission to do this!"
+
+
+permissions:
+  recap.admin:
+    description: Permission to access the recap command
+    default: op
+  recap.update:
+    description: Permission to be notified of recap updates on login
+    default: false
