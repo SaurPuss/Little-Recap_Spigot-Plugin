@@ -44,6 +44,10 @@ public class RecapManager {
         recapLog = populateRecap();
     }
 
+    public Deque<String> getRecapLog() {
+        return recapLog;
+    }
+
 
 
     public void addRecap(CommandSender sender, String message) {

@@ -27,14 +27,9 @@ public class Recap implements CommandExecutor {
      */
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-
         // Display the last 10 recaps
         if (args.length == 0) {
-            // TODO display array list from recap manager
-
-
-
-
+            plugin.getRecapManager().getRecapLog().forEach(sender::sendMessage);
             return true;
         }
 
@@ -42,19 +37,17 @@ public class Recap implements CommandExecutor {
         if (args[0].equalsIgnoreCase("reload")) {
             if (!sender.hasPermission("recap.admin.reload")) {
                 sender.sendMessage(ChatColor.RED + "You do not have permission!");
-                return true;
             } else {
-                // TODO reload the plugin
-
-
-                return true;
+                plugin.reloadConfig();
+                sender.sendMessage(ChatColor.GREEN + "Reloaded LittleRecap!");
             }
+            return true;
         }
 
-        // Save the arguments as a string to add to the log
+        // Save the arguments as a string to add to the recap log
         String message = StringUtils.join(args, ' ');
-
         plugin.getRecapManager().addRecap(sender, message);
+
         return true;
     }
 }
