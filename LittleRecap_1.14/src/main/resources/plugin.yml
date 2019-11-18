@@ -1,0 +1,27 @@
+name: LittleRecap
+version: ${project.version}
+main: me.saurpuss.voxmc.littlerecap.LittleRecap
+api-version: 1.14
+prefix: RECAP
+author: SaurPuss
+description: Small /recap plugin to support VoxMC 1.14 needs
+website: https://github.com/SaurPuss/Little-Recap_Spigot-Plugin
+
+commands:
+  recap:
+    description: Record or view a message for information handoff
+    usage: |
+      /<command> - Display the last X recap messages
+      /<command> [message...] - Add a new recap to the log
+      /<command> <reload> - Reload the LittleRecap plugin
+    permission: recap.use
+    permission-message: '§eUnknown command'
+
+
+permissions:
+  recap.use:
+    description: Permission to access the /recap command
+    default: op
+  recap.reload:
+    description: Permissiong to reload the LittleRecap plugin
+    default: false
