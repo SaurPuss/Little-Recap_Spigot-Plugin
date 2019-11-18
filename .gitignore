@@ -28,3 +28,9 @@ hs_err_pid*
 # OSX
 .DS_Store
 
+
+LittleRecap_1.14/target/classes/
+
+LittleRecap_1.13/target/maven-status/maven-compiler-plugin/testCompile/default-testCompile/
+
+LittleRecap_1.13/target/maven-status/maven-compiler-plugin/compile/default-compile/
