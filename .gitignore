@@ -24,7 +24,9 @@ hs_err_pid*
 
 # intellij IDEA
 .idea/
-/target/
-
+target/
+.DS_Store
+out/
+sout/
 # OSX
 .DS_Store
