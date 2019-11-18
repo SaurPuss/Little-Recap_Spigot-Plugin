@@ -5,8 +5,8 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>me.saurpuss.voxmc</groupId>
-    <artifactId>LittleRecap</artifactId>
-    <version>1.13.2_1.0</version>
+    <artifactId>LittleRecap-1.13</artifactId>
+    <version>1.0</version>
     <packaging>jar</packaging>
 
     <name>LittleRecap</name>

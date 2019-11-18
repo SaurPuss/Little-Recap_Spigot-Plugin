@@ -1,31 +1,24 @@
 package me.saurpuss.voxmc.littlerecap;
 
 import me.saurpuss.voxmc.littlerecap.commands.Recap;
-import me.saurpuss.voxmc.littlerecap.events.UpdateNotification;
 import me.saurpuss.voxmc.littlerecap.util.RecapManager;
-import org.bukkit.ChatColor;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.util.logging.Level;
+
 /**
- *
+ * A small plugin that provides the ability to read and write recap notes for server moderators.
  */
 public final class LittleRecap extends JavaPlugin {
 
     /**
-     *
+     * Manage recap utility where the actual magic happens.
      */
     private static RecapManager recapManager;
 
     /**
-     *
-     */
-    private boolean hasUpdate;
-
-    /**
      * LittleRecap startup logic:
      * - Set up default config if it doesn't exist
-     * - Check if there are updates available
-     *  - Register update notification on join event
      * - Register /recap command
      * - Set up the RecapManager
      */
@@ -35,15 +28,6 @@ public final class LittleRecap extends JavaPlugin {
         getConfig().options().copyDefaults(true);
         saveDefaultConfig();
 
-        // Check if the plugin has updates available
-        hasUpdate = checkForUpdates(); // TODO implement this
-        if (availableUpdate()) {
-            getLogger().info(ChatColor.GREEN + "Update available for LittleRecap!");
-
-            // Register update notification event
-            getServer().getPluginManager().registerEvents(new UpdateNotification(this), this);
-        }
-
         // Register recap command
         getCommand("recap").setExecutor(new Recap(this));
 
@@ -51,19 +35,17 @@ public final class LittleRecap extends JavaPlugin {
         recapManager = new RecapManager(this);
 
         // Plugin is set up an running!
-        getLogger().info(ChatColor.GREEN + "Successfully enabled LittleRecap!");
+        getLogger().log(Level.FINE, "Enabled LittleRecap!");
     }
 
     /**
-     * LittleRecap shutdown logic
+     * LittleRecap shutdown logic.
      */
     @Override
-    public void onDisable() {
-
-    }
+    public void onDisable() {}
 
     /**
-     * Access the RecapManager
+     * Access the RecapManager.
      *
      * @return current instance of the RecapManager
      */
@@ -72,15 +54,9 @@ public final class LittleRecap extends JavaPlugin {
     }
 
     /**
-     * Check if there are any newer versions of the plugin available
-     *
-     * @return boolean true if newer version exists
+     * Reload the recap manager to read a fresh config
      */
-    private boolean checkForUpdates() {
-        return false;
-    }
-
-    public boolean availableUpdate() {
-        return hasUpdate;
+    public void reloadRecapManager() {
+        recapManager = new RecapManager(this);
     }
 }

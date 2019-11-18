@@ -2,18 +2,30 @@ package me.saurpuss.voxmc.littlerecap.commands;
 
 import me.saurpuss.voxmc.littlerecap.LittleRecap;
 import org.apache.commons.lang.StringUtils;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.ConsoleCommandSender;
+import org.bukkit.entity.Player;
+
+import java.util.logging.Level;
 
 /**
- *
+ * Command implementation for server side recap access.
  */
 public class Recap implements CommandExecutor {
 
+    /**
+     * Current plugin runtime.
+     */
     private LittleRecap plugin;
 
+    /**
+     * Command implementation constructor registered in LittleRecap#onEnable()
+     * @param plugin dependency injection of the current plugin runtime
+     */
     public Recap(LittleRecap plugin) {
         this.plugin = plugin;
     }
@@ -27,7 +39,9 @@ public class Recap implements CommandExecutor {
      */
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        // Display the last 10 recaps
+        if (!sender.hasPermission("recap.use")) return true;
+
+        // Display the last X recaps
         if (args.length == 0) {
             plugin.getRecapManager().getRecapLog().forEach(sender::sendMessage);
             return true;
@@ -35,11 +49,18 @@ public class Recap implements CommandExecutor {
 
         // Admins with the correct perms are allowed to reload
         if (args[0].equalsIgnoreCase("reload")) {
-            if (!sender.hasPermission("recap.admin.reload")) {
+            if (sender instanceof Player && !sender.hasPermission("recap.reload")) {
                 sender.sendMessage(ChatColor.RED + "You do not have permission!");
             } else {
                 plugin.reloadConfig();
-                sender.sendMessage(ChatColor.GREEN + "Reloaded LittleRecap!");
+                plugin.reloadRecapManager();
+
+                for (Player player : Bukkit.getOnlinePlayers()) {
+                    if (player.hasPermission("recap.reload")) {
+                        player.sendMessage(ChatColor.GREEN + "Reloaded LittleRecap!");
+                    }
+                }
+                plugin.getLogger().log(Level.INFO, "Finished reloading plugin!");
             }
             return true;
         }
