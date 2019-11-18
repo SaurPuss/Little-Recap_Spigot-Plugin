@@ -6,7 +6,7 @@
 
     <groupId>me.saurpuss.voxmc</groupId>
     <artifactId>Recap</artifactId>
-    <version>1.13-1.1</version>
+    <version>1.13-1.1.1</version>
     <packaging>jar</packaging>
 
     <name>Recap</name>

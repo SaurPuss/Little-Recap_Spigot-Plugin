@@ -17,6 +17,9 @@ append-log: true
 # Append the recap log with the username of the person making the log                              #
 log-author: true
 
+# Display the created recap to all online users with the recap.use perm node                       #
+show-online: true
+
 # Translate color codes using '&' in the recap message                                             #
 allow-colors: true
 

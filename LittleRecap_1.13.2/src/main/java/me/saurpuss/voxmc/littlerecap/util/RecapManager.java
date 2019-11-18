@@ -5,6 +5,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.entity.Player;
 
 import java.io.*;
 import java.nio.charset.Charset;
@@ -41,6 +42,12 @@ public class RecapManager {
     private final boolean logAuthor;
 
     /**
+     * Display the recap log to the online players with the recap.use perm node when a new log is
+     * made.
+     */
+    private final boolean showOnline;
+
+    /**
      * Allow the recap message to have color codes, defined in config.yml.
      */
     private final boolean allowColors;
@@ -74,6 +81,7 @@ public class RecapManager {
         formatter = DateTimeFormatter.ofPattern(Objects.requireNonNull(config.getString("date-format")));
         maxSize = Math.abs(config.getInt("max-size"));
         logAuthor = config.getBoolean("log-author");
+        showOnline = config.getBoolean("show-online");
         allowColors = config.getBoolean("allow-colors");
         appendLog = config.getBoolean("append-log");
 
@@ -117,6 +125,12 @@ public class RecapManager {
         // Notify command executor
         sender.sendMessage(success ? ChatColor.GREEN + "Successfully added recap!" :
                 ChatColor.RED + "Failed to add recap!");
+        if (showOnline) {
+            for (Player player : Bukkit.getOnlinePlayers()) {
+                if (player.hasPermission("recap.use"))
+                    player.sendMessage(ChatColor.GREEN + "[RECAP] " + recapLog.getFirst());
+            }
+        }
         Bukkit.getConsoleSender().sendMessage("[RECAP] " + recapLog.getFirst());
     }
 
