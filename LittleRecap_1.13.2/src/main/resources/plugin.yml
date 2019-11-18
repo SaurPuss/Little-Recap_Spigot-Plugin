@@ -1,4 +1,4 @@
-name: LittleRecap
+name: Recap
 version: ${project.version}
 main: me.saurpuss.voxmc.littlerecap.LittleRecap
 api-version: 1.13

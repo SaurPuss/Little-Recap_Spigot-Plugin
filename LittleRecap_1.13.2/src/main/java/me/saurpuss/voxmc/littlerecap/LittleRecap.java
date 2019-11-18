@@ -1,6 +1,7 @@
 package me.saurpuss.voxmc.littlerecap;
 
 import me.saurpuss.voxmc.littlerecap.commands.Recap;
+import me.saurpuss.voxmc.littlerecap.events.RecapListener;
 import me.saurpuss.voxmc.littlerecap.util.RecapManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -31,11 +32,14 @@ public final class LittleRecap extends JavaPlugin {
         // Register recap command
         getCommand("recap").setExecutor(new Recap(this));
 
+        // Register event listener
+        getServer().getPluginManager().registerEvents(new RecapListener(this), this);
+
         // Register recap manager
         recapManager = new RecapManager(this);
 
         // Plugin is set up an running!
-        getLogger().log(Level.FINE, "Enabled LittleRecap!");
+        getLogger().log(Level.FINE, "Enabled Recap!");
     }
 
     /**

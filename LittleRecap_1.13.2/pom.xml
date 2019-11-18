@@ -5,11 +5,11 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>me.saurpuss.voxmc</groupId>
-    <artifactId>LittleRecap-1.13</artifactId>
-    <version>1.0</version>
+    <artifactId>Recap</artifactId>
+    <version>1.13-1.1</version>
     <packaging>jar</packaging>
 
-    <name>LittleRecap</name>
+    <name>Recap</name>
 
     <description>Small /recap plugin to support VoxMC 1.13.2 needs</description>
     <properties>
