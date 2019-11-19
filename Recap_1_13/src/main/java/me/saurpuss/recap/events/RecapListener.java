@@ -7,8 +7,8 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 
 /**
- * Event listener to allow players with the permnode recap.use to get the last recaps logged
- * displayed in their chat.
+ * Event listener to allow players with the permission node recap.notify to get the last recaps
+ * logged displayed in their chat.
  */
 public class RecapListener implements Listener {
 
@@ -19,14 +19,17 @@ public class RecapListener implements Listener {
 
     /**
      * Constructor to get the event up and running
-     * @param plugin dependency injection of the current runtime
+     *
+     * @param plugin dependency injection of the current plugin runtime
      */
     public RecapListener(Recap plugin) {
         recap = plugin;
     }
 
     /**
-     * PlayerJoin event listener
+     * PlayerJoinEvent Listener that displays the last recap log to players with the recap.notify
+     * permission.
+     *
      * @param event on player join
      */
     @EventHandler

@@ -1,10 +1,9 @@
 package me.saurpuss.recap;
 
 import me.saurpuss.recap.commands.RecapCommand;
+import me.saurpuss.recap.events.RecapListener;
 import me.saurpuss.recap.util.RecapManager;
 import org.bukkit.plugin.java.JavaPlugin;
-
-import java.util.logging.Level;
 
 /**
  * A small plugin that provides the ability to read and write recap notes for server moderators.
@@ -31,11 +30,11 @@ public final class Recap extends JavaPlugin {
         // Register recap command
         getCommand("recap").setExecutor(new RecapCommand(this));
 
+        // Register event listener
+        getServer().getPluginManager().registerEvents(new RecapListener(this), this);
+
         // Register recap manager
         recapManager = new RecapManager(this);
-
-        // Plugin is set up an running!
-        getLogger().log(Level.FINE, "Enabled LittleRecap!");
     }
 
     /**

@@ -3,6 +3,8 @@
 ### 1.1.1 - Minor updates
 #### Added:
 * recap.notification permission node
+#### Updated:
+* Permission message for the recap command
 #### Other:
 * Project refactor
 

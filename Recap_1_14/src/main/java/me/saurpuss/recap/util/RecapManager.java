@@ -5,6 +5,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.entity.Player;
 
 import java.io.*;
 import java.nio.charset.Charset;
@@ -25,8 +26,7 @@ public class RecapManager {
     private Recap plugin;
 
     /**
-     * Preferred date formatting for recap logs. Defaults to "MMM dd" if no valid format is found.
-     * Uses java DateTimeFormatter class.
+     * Preferred date formatting for recap logs. Uses java DateTimeFormatter class.
      */
     private final DateTimeFormatter formatter;
 
@@ -41,6 +41,12 @@ public class RecapManager {
     private final boolean logAuthor;
 
     /**
+     * Display the recap log on server join event and display newly created logs to online players
+     * with the recap.notify permission.
+     */
+    private final boolean showOnline;
+
+    /**
      * Allow the recap message to have color codes, defined in config.yml.
      */
     private final boolean allowColors;
@@ -52,7 +58,7 @@ public class RecapManager {
     private final boolean appendLog;
 
     /**
-     * Runtime definition of recap.txt.
+     * recap.txt in the config folder
      */
     private File recapFile;
 
@@ -64,6 +70,7 @@ public class RecapManager {
     /**
      * Recap Manager constructor. Used to set up the file and variables and control access to the
      * recap functionality for the recap command.
+     *
      * @param recap dependency injection of the current plugin runtime
      */
     public RecapManager(Recap recap) {
@@ -74,6 +81,7 @@ public class RecapManager {
         formatter = DateTimeFormatter.ofPattern(Objects.requireNonNull(config.getString("date-format")));
         maxSize = Math.abs(config.getInt("max-size"));
         logAuthor = config.getBoolean("log-author");
+        showOnline = config.getBoolean("show-online");
         allowColors = config.getBoolean("allow-colors");
         appendLog = config.getBoolean("append-log");
 
@@ -88,6 +96,7 @@ public class RecapManager {
 
     /**
      * Get the current copy of the runtime recap log.
+     *
      * @return Linked List with the latest recaps
      */
     public Deque<String> getRecapLog() {
@@ -96,8 +105,10 @@ public class RecapManager {
 
     /**
      * Functional implementation of the recap command, adding a log line to the file and the
-     * runtime recap log.
-     * @param sender Command Executor from the recap command
+     * runtime recap log. Example recap:
+     * §cAUG 02 §6-§c Zombiemold§6:§r Recap message here.
+     *
+     * @param sender  Command Executor from the recap command
      * @param message Message to be logged
      */
     public void addRecap(CommandSender sender, String message) {
@@ -117,11 +128,18 @@ public class RecapManager {
         // Notify command executor
         sender.sendMessage(success ? ChatColor.GREEN + "Successfully added recap!" :
                 ChatColor.RED + "Failed to add recap!");
+        if (showOnline) {
+            for (Player player : Bukkit.getOnlinePlayers()) {
+                if (player.hasPermission("recap.notify"))
+                    player.sendMessage(ChatColor.GREEN + "[RECAP] " + recapLog.getFirst());
+            }
+        }
         Bukkit.getConsoleSender().sendMessage("[RECAP] " + recapLog.getFirst());
     }
 
     /**
      * Add a line to recap.txt with the latest log.
+     *
      * @param log Formatted message to be logged in the recap.txt file
      * @return success
      */
@@ -139,6 +157,7 @@ public class RecapManager {
 
     /**
      * Override the current recap.txt with the updated version of the runtime recap log.
+     *
      * @return success
      */
     private boolean overrideRecap() {
@@ -156,6 +175,7 @@ public class RecapManager {
     /**
      * Populate the runtime recap log with information from the recap.txt file, sorted from
      * newest to oldest.
+     *
      * @return Linked List filled with the recap logs
      */
     private Deque<String> populateRecap() {
@@ -173,7 +193,9 @@ public class RecapManager {
 
         Deque<String> log = new LinkedList<>();
         // If append is true, make sure to get the last X entries
-        if (appendLog) Collections.reverse(list);
+        if (appendLog)
+            Collections.reverse(list);
+
         for (int i = 0; i < maxSize && i < list.size(); i++)
             log.add(list.get(i));
 
