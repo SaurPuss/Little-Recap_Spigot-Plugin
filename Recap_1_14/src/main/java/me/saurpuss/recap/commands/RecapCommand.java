@@ -1,5 +1,6 @@
 package me.saurpuss.recap.commands;
 
+import me.saurpuss.recap.Recap;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -18,30 +19,29 @@ public class RecapCommand implements CommandExecutor {
     /**
      * Current plugin runtime.
      */
-    private me.saurpuss.recap.Recap plugin;
+    private Recap recap;
 
     /**
      * Command implementation constructor registered in LittleRecap#onEnable()
+     *
      * @param plugin dependency injection of the current plugin runtime
      */
-    public RecapCommand(me.saurpuss.recap.Recap plugin) {
-        this.plugin = plugin;
+    public RecapCommand(Recap plugin) {
+        recap = plugin;
     }
 
     /**
-     * Implementation of the /recap command
-     *   /recap           - Display the last 10 recaps
-     *   /recap [reload]  - If the CommandSender has permission this reloads
-     *                     the plugin config.yml
-     *   /recap [message] - Create an addition to the recap log
+     * Implementation of the /recap command:
+     * /recap           - Display the last 10 recaps
+     * /recap reload    - If the CommandSender has permission this reloads
+     * the plugin config.yml
+     * /recap [message] - Create an addition to the recap log
      */
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        if (!sender.hasPermission("recap.use")) return true;
-
         // Display the last X recaps
         if (args.length == 0) {
-            plugin.getRecapManager().getRecapLog().forEach(sender::sendMessage);
+            recap.getRecapManager().getRecapLog().forEach(sender::sendMessage);
             return true;
         }
 
@@ -50,23 +50,21 @@ public class RecapCommand implements CommandExecutor {
             if (sender instanceof Player && !sender.hasPermission("recap.reload")) {
                 sender.sendMessage(ChatColor.RED + "You do not have permission!");
             } else {
-                plugin.reloadConfig();
-                plugin.reloadRecapManager();
+                recap.reloadConfig();
+                recap.reloadRecapManager();
 
                 for (Player player : Bukkit.getOnlinePlayers()) {
-                    if (player.hasPermission("recap.reload")) {
-                        player.sendMessage(ChatColor.GREEN + "Reloaded LittleRecap!");
+                    if (player.hasPermission("recap.notify")) {
+                        player.sendMessage(ChatColor.GREEN + "Reloaded Recap!");
                     }
                 }
-                plugin.getLogger().log(Level.INFO, "Finished reloading plugin!");
+                recap.getLogger().log(Level.INFO, "Finished reloading plugin!");
             }
             return true;
         }
 
         // Save the arguments as a string to add to the recap log
-        String message = StringUtils.join(args, ' ');
-        plugin.getRecapManager().addRecap(sender, message);
-
+        recap.getRecapManager().addRecap(sender, StringUtils.join(args, ' '));
         return true;
     }
 }
