@@ -1,6 +1,6 @@
 name: Recap
 version: ${project.version}
-main: me.saurpuss.Recap
+main: me.saurpuss.recap.Recap
 api-version: 1.13
 prefix: RECAP
 author: SaurPuss
@@ -13,7 +13,7 @@ commands:
     usage: |
       /<command> - Display the last X recap messages
       /<command> <message...> - Add a new recap to the log
-      /<command> reload - Reload the LittleRecap plugin
+      /<command> reload - Reload the Recap plugin
     permission: recap.use
     permission-message: '§cYou do not have permission!'
 
@@ -24,5 +24,5 @@ permissions:
     children:
       recap.notify: true
   recap.reload:
-    description: Permissiong to reload the LittleRecap plugin
+    description: Permission to reload the Recap plugin
     default: false
