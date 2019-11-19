@@ -1,5 +1,5 @@
 <h1>Recap</h1>
-<h4>Spigot Plugin for 1.13 and up</h4>
+<h4>Spigot Plugin for 1.13+</h4>
 Simple information hand-off using the /recap command.
 
 <h3>Commands:</h3>
