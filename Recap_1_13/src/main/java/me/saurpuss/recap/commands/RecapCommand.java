@@ -22,7 +22,7 @@ public class RecapCommand implements CommandExecutor {
     private Recap recap;
 
     /**
-     * Command implementation constructor registered in LittleRecap#onEnable()
+     * Command implementation constructor registered in Recap#onEnable()
      *
      * @param plugin dependency injection of the current plugin runtime
      */
@@ -34,7 +34,7 @@ public class RecapCommand implements CommandExecutor {
      * Implementation of the /recap command:
      * /recap           - Display the last 10 recaps
      * /recap reload    - If the CommandSender has permission this reloads
-     * the plugin config.yml
+     *                    the plugin config.yml
      * /recap [message] - Create an addition to the recap log
      */
     @Override

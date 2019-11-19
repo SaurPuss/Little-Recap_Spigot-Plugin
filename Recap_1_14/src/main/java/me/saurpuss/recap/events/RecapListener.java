@@ -13,7 +13,7 @@ import org.bukkit.event.player.PlayerJoinEvent;
 public class RecapListener implements Listener {
 
     /**
-     * Runtime instance of the LittleRecap plugin
+     * Runtime instance of the Recap plugin
      */
     private Recap recap;
 

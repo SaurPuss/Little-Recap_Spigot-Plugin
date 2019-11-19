@@ -16,7 +16,7 @@ public final class Recap extends JavaPlugin {
     private static RecapManager recapManager;
 
     /**
-     * LittleRecap startup logic:
+     * Recap startup logic:
      * - Set up default config if it doesn't exist
      * - Register /recap command
      * - Set up the RecapManager
@@ -38,7 +38,7 @@ public final class Recap extends JavaPlugin {
     }
 
     /**
-     * LittleRecap shutdown logic.
+     * Recap shutdown logic.
      */
     @Override
     public void onDisable() {}

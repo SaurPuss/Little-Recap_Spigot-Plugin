@@ -22,7 +22,7 @@ public class RecapCommand implements CommandExecutor {
     private Recap recap;
 
     /**
-     * Command implementation constructor registered in LittleRecap#onEnable()
+     * Command implementation constructor registered in Recap#onEnable()
      *
      * @param plugin dependency injection of the current plugin runtime
      */
