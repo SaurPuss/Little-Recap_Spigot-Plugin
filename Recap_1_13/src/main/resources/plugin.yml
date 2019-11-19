@@ -1,0 +1,28 @@
+name: Recap
+version: ${project.version}
+main: me.saurpuss.Recap
+api-version: 1.13
+prefix: RECAP
+author: SaurPuss
+description: Small /recap plugin
+website: https://github.com/SaurPuss/Recap-Plugin
+
+commands:
+  recap:
+    description: Record or view a message for information handoff
+    usage: |
+      /<command> - Display the last X recap messages
+      /<command> <message...> - Add a new recap to the log
+      /<command> reload - Reload the LittleRecap plugin
+    permission: recap.use
+    permission-message: '§cYou do not have permission!'
+
+permissions:
+  recap.use:
+    description: Permission to access the /recap command
+    default: op
+    children:
+      recap.notify: true
+  recap.reload:
+    description: Permissiong to reload the LittleRecap plugin
+    default: false
