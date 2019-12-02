@@ -36,8 +36,10 @@ public class RecapListener implements Listener {
     public void onJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
 
-        if (player.hasPermission("recap.notify")) {
-            recap.getRecapManager().getRecapLog().forEach(player::sendMessage);
+        if (recap.getConfig().getBoolean("show-online")) {
+            if (player.hasPermission("recap.notify")) {
+                recap.getRecapManager().getRecapLog().forEach(player::sendMessage);
+            }
         }
     }
 
