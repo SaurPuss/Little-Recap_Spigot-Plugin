@@ -1,5 +1,12 @@
 #Recap Plugin Changelog
 
+### 1.1.2 - Refactoring & minor updates
+#### Added:
+* Recap display sorting options
+* recap.reload.notify permission node
+#### Updated:
+* Async task integration for reading and writing to recap log
+
 ### 1.1.1 - Minor updates
 #### Added:
 * recap.notification permission node

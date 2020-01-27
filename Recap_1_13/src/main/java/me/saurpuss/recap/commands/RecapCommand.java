@@ -49,17 +49,21 @@ public class RecapCommand implements CommandExecutor {
         if (args[0].equalsIgnoreCase("reload")) {
             if (sender instanceof Player && !sender.hasPermission("recap.reload")) {
                 sender.sendMessage(ChatColor.RED + "You do not have permission!");
-            } else {
-                recap.reloadConfig();
-                recap.reloadRecapManager();
-
-                for (Player player : Bukkit.getOnlinePlayers()) {
-                    if (player.hasPermission("recap.notify")) {
-                        player.sendMessage(ChatColor.GREEN + "Reloaded Recap!");
-                    }
-                }
-                recap.getLogger().log(Level.INFO, "Finished reloading plugin!");
+                return false;
             }
+            recap.reloadConfig();
+            recap.reloadRecapManager();
+
+            // TODO reload event registration
+
+            for (Player player : Bukkit.getOnlinePlayers()) {
+                if (player.hasPermission("recap.notify")) {
+                    // TODO reload notify permission
+                    player.sendMessage(ChatColor.GREEN + "Reloaded Recap!");
+                }
+            }
+
+            recap.getLogger().log(Level.INFO, "Finished reloading plugin!");
             return true;
         }
 

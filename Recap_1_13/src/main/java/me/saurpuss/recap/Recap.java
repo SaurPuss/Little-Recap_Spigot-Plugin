@@ -1,7 +1,7 @@
 package me.saurpuss.recap;
 
 import me.saurpuss.recap.commands.RecapCommand;
-import me.saurpuss.recap.events.RecapListener;
+import me.saurpuss.recap.events.JoinNotifyListener;
 import me.saurpuss.recap.util.RecapManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -30,8 +30,8 @@ public final class Recap extends JavaPlugin {
         // Register recap command
         getCommand("recap").setExecutor(new RecapCommand(this));
 
-        // Register event listener
-        getServer().getPluginManager().registerEvents(new RecapListener(this), this);
+        // Register events
+        registerEvents();
 
         // Register recap manager
         recapManager = new RecapManager(this);
@@ -42,6 +42,12 @@ public final class Recap extends JavaPlugin {
      */
     @Override
     public void onDisable() {}
+
+    public void registerEvents() {
+        // Register event listener if notify on join is enabled
+        if (getConfig().getBoolean("show-on-join"))
+            getServer().getPluginManager().registerEvents(new JoinNotifyListener(this), this);
+    }
 
     /**
      * Access the RecapManager.

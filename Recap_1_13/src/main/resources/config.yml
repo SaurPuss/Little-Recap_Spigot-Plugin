@@ -17,12 +17,17 @@ append-log: true
 # Append the recap log with the username of the person making the log
 log-author: true
 
-# Display the latest recap log on server join for all players with the recap notify permission and
-# display newly created recaps to all online players with the same permission node
-show-online: true
+# Display the latest recap log on server join for all players with the recap.notify permission
+show-on-join: true
+
+# Display newly created recaps to all online players with the recap.notify permission
+notify-live: true
 
 # Translate color codes using '&' in the recap message
 allow-colors: true
 
-# How many entries should be returned when checking the last recap
+# How many entries should be listed when checking the last recap
 max-size: 10
+
+# Display recap log from first to last entry (newest at the top)
+fifo-sorting: true

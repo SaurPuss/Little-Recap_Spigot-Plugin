@@ -8,9 +8,9 @@ import org.bukkit.event.player.PlayerJoinEvent;
 
 /**
  * Event listener to allow players with the permission node recap.notify to get the last recaps
- * logged displayed in their chat.
+ * logged displayed in their chat. Only registered if 'show-on-join' in config.yml is true.
  */
-public class RecapListener implements Listener {
+public class JoinNotifyListener implements Listener {
 
     /**
      * Runtime instance of the Recap plugin
@@ -22,7 +22,7 @@ public class RecapListener implements Listener {
      *
      * @param plugin dependency injection of the current plugin runtime
      */
-    public RecapListener(Recap plugin) {
+    public JoinNotifyListener(Recap plugin) {
         recap = plugin;
     }
 
@@ -34,13 +34,10 @@ public class RecapListener implements Listener {
      */
     @EventHandler
     public void onJoin(PlayerJoinEvent event) {
-        Player player = event.getPlayer();
+        if (!event.getPlayer().hasPermission("recap.notify")) return;
 
-        if (recap.getConfig().getBoolean("show-online")) {
-            if (player.hasPermission("recap.notify")) {
-                recap.getRecapManager().getRecapLog().forEach(player::sendMessage);
-            }
-        }
+        Player player = event.getPlayer();
+        recap.getRecapManager().getRecapLog().forEach(player::sendMessage);
     }
 
 }

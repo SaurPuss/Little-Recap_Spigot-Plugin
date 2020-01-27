@@ -44,7 +44,9 @@ public class RecapManager {
      * Display the recap log on server join event and display newly created logs to online players
      * with the recap.notify permission.
      */
-    private final boolean showOnline;
+    private final boolean showOnJoin;
+
+    private final boolean showLive;
 
     /**
      * Allow the recap message to have color codes, defined in config.yml.
@@ -56,6 +58,10 @@ public class RecapManager {
      * runtime recap log.
      */
     private final boolean appendLog;
+    /**
+     * Sort the recap log entries from first to last
+     */
+    private final boolean fifo;
 
     /**
      * recap.txt in the config folder
@@ -78,15 +84,18 @@ public class RecapManager {
         FileConfiguration config = plugin.getConfig();
 
         // Get preferences
-        formatter = DateTimeFormatter.ofPattern(Objects.requireNonNull(config.getString("date-format")));
+        formatter = DateTimeFormatter.ofPattern(Objects.requireNonNull(config.getString(
+                "date-format"))); // TODO add default fallback
         maxSize = Math.abs(config.getInt("max-size"));
         logAuthor = config.getBoolean("log-author");
-        showOnline = config.getBoolean("show-online");
+        showOnJoin = config.getBoolean("show-on-join"); // TODO
+        showLive = config.getBoolean("notify-live"); // TODO
         allowColors = config.getBoolean("allow-colors");
-        appendLog = config.getBoolean("append-log");
+        appendLog = config.getBoolean("append-log"); // TODO
+        fifo = config.getBoolean("fifo-sorting"); // TODO
 
         // Set up recap.txt (if necessary)
-        recapFile = new File(this.plugin.getDataFolder(), "recap.txt");
+        recapFile = new File(plugin.getDataFolder(), "recap.txt");
         if (!recapFile.exists() || recapFile.length() == 0)
             makeRecapLog();
 
@@ -128,7 +137,7 @@ public class RecapManager {
         // Notify command executor
         sender.sendMessage(success ? ChatColor.GREEN + "Successfully added recap!" :
                 ChatColor.RED + "Failed to add recap!");
-        if (showOnline) {
+        if (showOnJoin) {
             for (Player player : Bukkit.getOnlinePlayers()) {
                 if (player.hasPermission("recap.notify"))
                     player.sendMessage(ChatColor.GREEN + "[RECAP] " + recapLog.getFirst());
