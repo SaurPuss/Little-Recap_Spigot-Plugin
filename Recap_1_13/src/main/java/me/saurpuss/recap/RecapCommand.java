@@ -1,6 +1,5 @@
-package me.saurpuss.recap.commands;
+package me.saurpuss.recap;
 
-import me.saurpuss.recap.Recap;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -19,10 +18,10 @@ import java.util.logging.Level;
 
 public class RecapCommand implements CommandExecutor, TabCompleter {
 
-    private Recap recap;
+    private RecapMain recapMain;
 
-    public RecapCommand(Recap plugin) {
-        recap = plugin;
+    public RecapCommand(RecapMain plugin) {
+        recapMain = plugin;
     }
 
     /**
@@ -35,7 +34,7 @@ public class RecapCommand implements CommandExecutor, TabCompleter {
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         // Display the last X recaps
         if (args.length == 0) {
-            recap.getRecapManager().getRecapLog().forEach(sender::sendMessage);
+            recapMain.getRecapManager().getRecapLog().forEach(sender::sendMessage);
             return true;
         }
 
@@ -47,24 +46,24 @@ public class RecapCommand implements CommandExecutor, TabCompleter {
             }
 
             // Reload config & manager
-            recap.reloadConfig();
-            recap.reloadRecapManager();
+            recapMain.reloadConfig();
+            recapMain.reloadRecapManager();
 
             // Reload events if necessary
-            HandlerList.unregisterAll(recap);
-            recap.registerEvents();
+            HandlerList.unregisterAll(recapMain);
+            recapMain.registerEvents();
 
             // Notify relevant parties
             for (Player player : Bukkit.getOnlinePlayers())
                 if (player.hasPermission("recap.reload.notify"))
                     player.sendMessage(ChatColor.GREEN + "Reloaded plugin!");
-            recap.getLogger().log(Level.INFO, "Finished reloading plugin!");
+            recapMain.getLogger().log(Level.INFO, "Finished reloading plugin!");
 
             return true;
         }
 
         // Save the arguments as a string to add to the recap log
-        recap.getRecapManager().addRecap(sender, StringUtils.join(args, ' '));
+        recapMain.getRecapManager().addRecap(sender, StringUtils.join(args, ' '));
         return true;
     }
 

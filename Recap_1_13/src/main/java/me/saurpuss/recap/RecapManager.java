@@ -19,13 +19,12 @@ import java.util.logging.Level;
  */
 public class RecapManager {
 
-    private Recap plugin;
+    private RecapMain plugin;
     private final DateTimeFormatter formatter;
 
     // Config preferences
     private final int maxSize;
     private final boolean logAuthor;
-    private final boolean showOnJoin;
     private final boolean showLive;
     private final boolean allowColors;
     private final boolean appendLog;
@@ -33,12 +32,12 @@ public class RecapManager {
 
     // Logging things
     private final File recapFile;
-    private final ReadWriteLock lock; // TODO
+    private final ReadWriteLock fileLock;
     private volatile Deque<String> recapLog; // TODO
 
-    public RecapManager(Recap recap) {
-        plugin = recap;
-        lock = new ReentrantReadWriteLock(); // TODO
+    public RecapManager(RecapMain recapMain) {
+        plugin = recapMain;
+        fileLock = new ReentrantReadWriteLock();
 
         // Get preferences
         final FileConfiguration config = plugin.getConfig();
@@ -46,29 +45,27 @@ public class RecapManager {
         formatter = DateTimeFormatter.ofPattern(format != null ? format : "MMM dd");
         maxSize = Math.abs(config.getInt("max-size"));
         logAuthor = config.getBoolean("log-author");
-        showOnJoin = config.getBoolean("show-on-join"); // TODO
-        showLive = config.getBoolean("notify-live"); // TODO
+        showLive = config.getBoolean("notify-live");
         allowColors = config.getBoolean("allow-colors");
         appendLog = config.getBoolean("append-log"); // TODO
         fifo = config.getBoolean("fifo-sorting"); // TODO
 
         // Set up recap.txt (if necessary)
         recapFile = new File(plugin.getDataFolder(), "recap.txt");
-        try {
-            if (!recapFile.exists()) {
-                plugin.getLogger().log(Level.INFO, "Could not find a valid recap.txt file in " +
-                        "the config folder, attempting to create a new file!");
+        if (!recapFile.exists()) {
+            try {
                 recapFile.createNewFile();
+            } catch (IOException e) {
+                plugin.getLogger().log(Level.WARNING, "Can't load file writer/reader, " +
+                        "disabling plugin!", e);
+                Bukkit.getPluginManager().disablePlugin(plugin);
+                return;
             }
-        } catch (IOException e) {
-            plugin.getLogger().log(Level.WARNING, "Can't load file writer/reader, " +
-                    "disabling plugin!", e);
-            Bukkit.getPluginManager().disablePlugin(plugin);
-            return;
         }
 
         // Try to retrieve existing recap logs
-        if (recapFile.length() == 0) makeRecapLog();
+        if (recapFile.length() == 0)
+            makeRecapLog();
         recapLog = populateRecap();
     }
 
@@ -91,7 +88,7 @@ public class RecapManager {
                 ChatColor.translateAlternateColorCodes('&', message) : message);
 
         // Add log to the linked list
-        recapLog.addFirst(log);
+        recapLog.addFirst(log); // TODO fifo
         if (recapLog.size() > maxSize)
             recapLog.removeLast();
 
@@ -101,7 +98,7 @@ public class RecapManager {
         // Notify command executor
         sender.sendMessage(success ? ChatColor.GREEN + "Successfully added recap!" :
                 ChatColor.RED + "Failed to add recap!");
-        if (showOnJoin) {
+        if (showLive) {
             for (Player player : Bukkit.getOnlinePlayers()) {
                 if (player.hasPermission("recap.notify"))
                     player.sendMessage(ChatColor.GREEN + "[RECAP] " + recapLog.getFirst());
@@ -153,22 +150,10 @@ public class RecapManager {
      * @return Linked List filled with the recap logs
      */
     private Deque<String> populateRecap() {
-        ArrayList<String> list = new ArrayList<>();
-        try (BufferedReader reader = new BufferedReader(
-                new InputStreamReader(new FileInputStream(recapFile), Charset.defaultCharset()))) {
-            String line;
-            while ((line = reader.readLine()) != null)
-                list.add(line);
-        } catch (IOException e) {
-            plugin.getLogger().log(Level.WARNING, "Error when trying to retrieve the logs " +
-                    "from recap.txt! Printing StackTrace and Disabling LittleRecap!" + e);
-            plugin.getServer().getPluginManager().disablePlugin(plugin);
-        }
-
+        List<String> list = read();
         Deque<String> log = new LinkedList<>();
         // If append is true, make sure to get the last X entries
-        if (appendLog)
-            Collections.reverse(list);
+        if (appendLog) Collections.reverse(list);
 
         for (int i = 0; i < maxSize && i < list.size(); i++)
             log.add(list.get(i));
@@ -190,28 +175,27 @@ public class RecapManager {
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
             boolean success = write(log);
 
-            Bukkit.getScheduler().runTask(plugin, () -> {
-                if(!success) {
-                    plugin.getLogger().log(Level.SEVERE, "Can't write to recap.txt! Disabling plugin!");
-                    plugin.getServer().getPluginManager().disablePlugin(plugin);
-                } else {
-                    plugin.getLogger().log(Level.INFO,
-                            "Successfully added to " + recapFile.getName() + ".txt!");
-                    recapLog.add(log); // TODO
-                }
-            });
+            if(!success) {
+                plugin.getLogger().log(Level.SEVERE, "Can't write to recap.txt! Disabling plugin!");
+                Bukkit.getScheduler().runTask(plugin, () -> // TODO do I need to sync this?
+                        plugin.getServer().getPluginManager().disablePlugin(plugin));
+            } else {
+                plugin.getLogger().log(Level.INFO, "Successfully created recap.txt!");
+                recapLog.add(log);
+            }
         });
-
-//        plugin.getLogger().log(Level.INFO, "Successfully set up recap.txt! Happy logging!");
     }
 
     private boolean write(String log) {
-        Lock writeLock = lock.writeLock();
+        Lock writeLock = fileLock.writeLock();
         writeLock.lock();
 
         try (PrintWriter writer = new PrintWriter(new FileWriter(recapFile, true), true)) {
             // Try to write to the fresh file
             writer.println(log);
+
+
+
 
             return true;
         } catch (IOException e) {
@@ -221,14 +205,26 @@ public class RecapManager {
         }
     }
 
-    private String read() {
-        // TODO
-        Lock readLock = lock.readLock();
-        readLock.lock();
+    private List<String> read() {
+        Lock readLock = fileLock.readLock();
+        readLock.lock(); // TODO
 
+        List<String> list = new ArrayList<>();
+        try (BufferedReader reader = new BufferedReader(
+                new InputStreamReader(new FileInputStream(recapFile), Charset.defaultCharset()))) {
+            String line;
+            while ((line = reader.readLine()) != null)
+                list.add(line);
 
+            return list;
+        } catch (IOException e) {
+            plugin.getLogger().log(Level.WARNING, "Error when trying to retrieve the logs " +
+                    "from recap.txt! Printing StackTrace and Disabling LittleRecap!" + e);
+            plugin.getServer().getPluginManager().disablePlugin(plugin);
+        } finally {
+            readLock.unlock();
+        }
 
-        readLock.unlock();
         return null;
     }
 }

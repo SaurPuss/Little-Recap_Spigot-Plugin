@@ -1,6 +1,5 @@
-package me.saurpuss.recap.events;
+package me.saurpuss.recap;
 
-import me.saurpuss.recap.Recap;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -8,10 +7,10 @@ import org.bukkit.event.player.PlayerJoinEvent;
 
 public class JoinNotifyListener implements Listener {
 
-    private Recap recap;
+    private RecapMain recapMain;
 
-    public JoinNotifyListener(Recap plugin) {
-        recap = plugin;
+    public JoinNotifyListener(RecapMain plugin) {
+        recapMain = plugin;
     }
 
     /**
@@ -23,6 +22,6 @@ public class JoinNotifyListener implements Listener {
         if (!event.getPlayer().hasPermission("recap.notify")) return;
 
         Player player = event.getPlayer();
-        recap.getRecapManager().getRecapLog().forEach(player::sendMessage);
+        recapMain.getRecapManager().getRecapLog().forEach(player::sendMessage);
     }
 }

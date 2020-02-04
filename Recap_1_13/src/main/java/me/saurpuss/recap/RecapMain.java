@@ -1,8 +1,5 @@
 package me.saurpuss.recap;
 
-import me.saurpuss.recap.commands.RecapCommand;
-import me.saurpuss.recap.events.JoinNotifyListener;
-import me.saurpuss.recap.util.UpdateChecker;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.logging.Level;
@@ -10,7 +7,7 @@ import java.util.logging.Level;
 /**
  * A small plugin that provides the ability to read and write recap notes for server moderators.
  */
-public final class Recap extends JavaPlugin {
+public final class RecapMain extends JavaPlugin {
 
     private RecapManager recapManager;
     private final int spigotID = -1; // TODO on first upload

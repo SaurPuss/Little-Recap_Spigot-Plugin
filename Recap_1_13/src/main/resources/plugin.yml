@@ -1,6 +1,6 @@
 name: Recap
 version: ${project.version}
-main: me.saurpuss.recap.Recap
+main: me.saurpuss.recap.RecapMain
 api-version: 1.13
 prefix: RECAP
 author: SaurPuss

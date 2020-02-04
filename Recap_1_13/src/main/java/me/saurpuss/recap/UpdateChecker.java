@@ -1,6 +1,5 @@
-package me.saurpuss.recap.util;
+package me.saurpuss.recap;
 
-import me.saurpuss.recap.Recap;
 import org.bukkit.Bukkit;
 
 import java.io.IOException;
@@ -12,11 +11,11 @@ import java.util.logging.Level;
 
 public class UpdateChecker {
 
-    private final Recap plugin;
+    private final RecapMain plugin;
     private final int id;
 
-    public UpdateChecker(Recap recap, int id) {
-        plugin = recap;
+    public UpdateChecker(RecapMain recapMain, int id) {
+        plugin = recapMain;
         this.id = id;
     }
 
