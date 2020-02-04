@@ -2,24 +2,26 @@ package me.saurpuss.recap;
 
 import me.saurpuss.recap.commands.RecapCommand;
 import me.saurpuss.recap.events.JoinNotifyListener;
-import me.saurpuss.recap.util.RecapManager;
+import me.saurpuss.recap.util.UpdateChecker;
 import org.bukkit.plugin.java.JavaPlugin;
+
+import java.util.logging.Level;
 
 /**
  * A small plugin that provides the ability to read and write recap notes for server moderators.
  */
 public final class Recap extends JavaPlugin {
 
-    /**
-     * Manage recap utility where the actual magic happens.
-     */
-    private static RecapManager recapManager;
+    private RecapManager recapManager;
+    private final int spigotID = -1; // TODO on first upload
 
     /**
      * Recap startup logic:
      * - Set up default config if it doesn't exist
-     * - Register /recap command
+     * - Register /recap command & tab completion
+     * - Register onJoin event
      * - Set up the RecapManager
+     * - Check for plugin updates
      */
     @Override
     public void onEnable() {
@@ -27,19 +29,25 @@ public final class Recap extends JavaPlugin {
         getConfig().options().copyDefaults(true);
         saveDefaultConfig();
 
-        // Register recap command
-        getCommand("recap").setExecutor(new RecapCommand(this));
+        // Setup recap command
+        RecapCommand recapCMD = new RecapCommand(this);
+        getCommand("recap").setExecutor(recapCMD);
+        getCommand("recap").setTabCompleter(recapCMD);
 
         // Register events
         registerEvents();
 
         // Register recap manager
         recapManager = new RecapManager(this);
+
+        // Poll the spigot site for latest plugin version number
+        new UpdateChecker(this, spigotID).getVersion(version -> {
+            if (!getDescription().getVersion().equalsIgnoreCase(version)) {
+                getLogger().log(Level.INFO, "Version " + version  + " is now available!");
+            }
+        });
     }
 
-    /**
-     * Recap shutdown logic.
-     */
     @Override
     public void onDisable() {}
 
@@ -49,18 +57,10 @@ public final class Recap extends JavaPlugin {
             getServer().getPluginManager().registerEvents(new JoinNotifyListener(this), this);
     }
 
-    /**
-     * Access the RecapManager.
-     *
-     * @return current instance of the RecapManager
-     */
     public RecapManager getRecapManager() {
         return recapManager;
     }
 
-    /**
-     * Reload the recap manager to read a fresh config
-     */
     public void reloadRecapManager() {
         recapManager = new RecapManager(this);
     }

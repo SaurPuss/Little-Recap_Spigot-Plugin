@@ -4,6 +4,7 @@
 #### Added:
 * Recap display sorting options
 * recap.reload.notify permission node
+* Tab completion for /recap reload
 #### Updated:
 * Async task integration for reading and writing to recap log
 

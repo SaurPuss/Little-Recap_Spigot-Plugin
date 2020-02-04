@@ -1,6 +1,5 @@
-package me.saurpuss.recap.util;
+package me.saurpuss.recap;
 
-import me.saurpuss.recap.Recap;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
@@ -9,10 +8,10 @@ import org.bukkit.entity.Player;
 
 import java.io.*;
 import java.nio.charset.Charset;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.concurrent.locks.*;
 import java.util.logging.Level;
 
 /**
@@ -20,72 +19,31 @@ import java.util.logging.Level;
  */
 public class RecapManager {
 
-    /**
-     * Current plugin runtime.
-     */
     private Recap plugin;
-
-    /**
-     * Preferred date formatting for recap logs. Uses java DateTimeFormatter class.
-     */
     private final DateTimeFormatter formatter;
 
-    /**
-     * Maximum size of the runtime recap log, defined in config.yml.
-     */
+    // Config preferences
     private final int maxSize;
-
-    /**
-     * Add the command executor to the recap log, defined in config.yml.
-     */
     private final boolean logAuthor;
-
-    /**
-     * Display the recap log on server join event and display newly created logs to online players
-     * with the recap.notify permission.
-     */
     private final boolean showOnJoin;
-
     private final boolean showLive;
-
-    /**
-     * Allow the recap message to have color codes, defined in config.yml.
-     */
     private final boolean allowColors;
-
-    /**
-     * Add each recap log to the recap.txt file, or overwrite the recap.txt file with the entire
-     * runtime recap log.
-     */
     private final boolean appendLog;
-    /**
-     * Sort the recap log entries from first to last
-     */
     private final boolean fifo;
 
-    /**
-     * recap.txt in the config folder
-     */
-    private File recapFile;
+    // Logging things
+    private final File recapFile;
+    private final ReadWriteLock lock; // TODO
+    private volatile Deque<String> recapLog; // TODO
 
-    /**
-     * Runtime recap log accessed by the recap command.
-     */
-    private static Deque<String> recapLog;
-
-    /**
-     * Recap Manager constructor. Used to set up the file and variables and control access to the
-     * recap functionality for the recap command.
-     *
-     * @param recap dependency injection of the current plugin runtime
-     */
     public RecapManager(Recap recap) {
         plugin = recap;
-        FileConfiguration config = plugin.getConfig();
+        lock = new ReentrantReadWriteLock(); // TODO
 
         // Get preferences
-        formatter = DateTimeFormatter.ofPattern(Objects.requireNonNull(config.getString(
-                "date-format"))); // TODO add default fallback
+        final FileConfiguration config = plugin.getConfig();
+        final String format = config.getString("date-format");
+        formatter = DateTimeFormatter.ofPattern(format != null ? format : "MMM dd");
         maxSize = Math.abs(config.getInt("max-size"));
         logAuthor = config.getBoolean("log-author");
         showOnJoin = config.getBoolean("show-on-join"); // TODO
@@ -96,18 +54,24 @@ public class RecapManager {
 
         // Set up recap.txt (if necessary)
         recapFile = new File(plugin.getDataFolder(), "recap.txt");
-        if (!recapFile.exists() || recapFile.length() == 0)
-            makeRecapLog();
+        try {
+            if (!recapFile.exists()) {
+                plugin.getLogger().log(Level.INFO, "Could not find a valid recap.txt file in " +
+                        "the config folder, attempting to create a new file!");
+                recapFile.createNewFile();
+            }
+        } catch (IOException e) {
+            plugin.getLogger().log(Level.WARNING, "Can't load file writer/reader, " +
+                    "disabling plugin!", e);
+            Bukkit.getPluginManager().disablePlugin(plugin);
+            return;
+        }
 
         // Try to retrieve existing recap logs
+        if (recapFile.length() == 0) makeRecapLog();
         recapLog = populateRecap();
     }
 
-    /**
-     * Get the current copy of the runtime recap log.
-     *
-     * @return Linked List with the latest recaps
-     */
     public Deque<String> getRecapLog() {
         return recapLog;
     }
@@ -143,7 +107,8 @@ public class RecapManager {
                     player.sendMessage(ChatColor.GREEN + "[RECAP] " + recapLog.getFirst());
             }
         }
-        Bukkit.getConsoleSender().sendMessage("[RECAP] " + recapLog.getFirst());
+
+        plugin.getLogger().log(Level.INFO, recapLog.getFirst());
     }
 
     /**
@@ -217,36 +182,53 @@ public class RecapManager {
      * console.
      */
     private void makeRecapLog() {
-        plugin.getLogger().log(Level.INFO, "Could not find a valid recap.txt file in " +
-                "the config folder, attempting to create a new file!");
+        plugin.getLogger().log(Level.INFO, "Attempting to write to recap.txt!");
 
-        try {
-            // Create file and directory if necessary
-            boolean fil = recapFile.createNewFile();
-            if (fil)
-                plugin.getLogger().log(Level.INFO, "Created recap.txt!");
-            else
-                plugin.getLogger().log(Level.WARNING, "recap.txt already exists!");
-        } catch (IOException e) {
-            // Can't continue without a working log, disable the plugin
-            plugin.getLogger().log(Level.SEVERE,
-                    "Can't create recap.txt! Disabling LittleRecap! " + e);
-            plugin.getServer().getPluginManager().disablePlugin(plugin);
-        }
+        final String log = "§c" + LocalDateTime.now().format(formatter) + "§6 - §rUse " +
+                "§d/recap [message here...] §rto add a recap!";
 
-        try {
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+            boolean success = write(log);
+
+            Bukkit.getScheduler().runTask(plugin, () -> {
+                if(!success) {
+                    plugin.getLogger().log(Level.SEVERE, "Can't write to recap.txt! Disabling plugin!");
+                    plugin.getServer().getPluginManager().disablePlugin(plugin);
+                } else {
+                    plugin.getLogger().log(Level.INFO,
+                            "Successfully added to " + recapFile.getName() + ".txt!");
+                    recapLog.add(log); // TODO
+                }
+            });
+        });
+
+//        plugin.getLogger().log(Level.INFO, "Successfully set up recap.txt! Happy logging!");
+    }
+
+    private boolean write(String log) {
+        Lock writeLock = lock.writeLock();
+        writeLock.lock();
+
+        try (PrintWriter writer = new PrintWriter(new FileWriter(recapFile, true), true)) {
             // Try to write to the fresh file
-            plugin.getLogger().log(Level.INFO, "Attempting to write to recap.txt!");
+            writer.println(log);
 
-            PrintWriter writer = new PrintWriter(new FileWriter(recapFile, true), true);
-            writer.println("§c" + LocalDateTime.now().format(formatter) + "§6 - §rUse §d/recap " +
-                    "[message here...] §rto add a recap!");
+            return true;
         } catch (IOException e) {
-            plugin.getLogger().log(Level.SEVERE,
-                    "Can't write to recap.txt! Disabling LittleRecap! " + e);
-            plugin.getServer().getPluginManager().disablePlugin(plugin);
+            return false;
+        } finally {
+            writeLock.unlock();
         }
+    }
 
-        plugin.getLogger().log(Level.INFO, "Successfully set up recap.txt! Happy logging!");
+    private String read() {
+        // TODO
+        Lock readLock = lock.readLock();
+        readLock.lock();
+
+
+
+        readLock.unlock();
+        return null;
     }
 }
