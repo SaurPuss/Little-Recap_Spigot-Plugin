@@ -24,14 +24,15 @@ public class RecapManager {
     private final int maxSize;
     private final boolean logAuthor;
     private final boolean allowColors;
-    private final boolean appendLog;
 
     // Logging things
     private final File recapFile;
-    private final ReadWriteLock readWriteLock = new ReentrantReadWriteLock();
-    private final Lock writeLock = readWriteLock.writeLock();
-    private final Lock readLock = readWriteLock.readLock();
-    private volatile Deque<String> recapLog; // TODO
+    private final ReadWriteLock fileLock = new ReentrantReadWriteLock();
+    private final Lock fileWriteLock = fileLock.writeLock();
+    private final Lock fileReadLock = fileLock.readLock();
+    private final ReadWriteLock queueLock = new ReentrantReadWriteLock(); // TODO do I need 2 locks?
+    private final Lock queueWriteLock = queueLock.writeLock();
+    private Deque<String> recent;
 
     public RecapManager(RecapMain recap) {
         plugin = recap;
@@ -43,7 +44,6 @@ public class RecapManager {
         maxSize = Math.abs(config.getInt("max-size"));
         logAuthor = config.getBoolean("log-author");
         allowColors = config.getBoolean("allow-colors");
-        appendLog = config.getBoolean("append-log");
 
         // Set up recap.txt (if necessary)
         recapFile = new File(plugin.getDataFolder(), "recap.txt");
@@ -60,11 +60,12 @@ public class RecapManager {
 
         // Try to retrieve existing recap logs
         if (recapFile.length() == 0) setupRecapFile();
-        recapLog = setupRecapQueue();
+        recent = setupRecapQueue();
     }
 
-    public Deque<String> getRecapLog() {
-        return recapLog;
+    public List<String> getRecent() {
+        final ArrayList<String> result = new ArrayList<>(recent);
+        return result;
     }
 
     public String getLogString(final String sender, final String message) {
@@ -75,20 +76,22 @@ public class RecapManager {
 
     public void writeLog(String log, FileWriteCallback callback) {
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
-            final boolean success = writeToFile(log);
+            final boolean toFile = writeToFile(log);
+            final boolean toQueue = writeToQueue(log);
 
-            // TODO add to dequeue
-
-            Bukkit.getScheduler().runTask(plugin, () -> callback.fileWriteCallback(success));
+            Bukkit.getScheduler().runTask(plugin, () -> callback.fileWriteCallback(toFile, toQueue));
         });
     }
 
     private boolean writeToQueue(String log) {
-        // TODO
-        recapLog.addLast(log);
-        if (recapLog.size() > maxSize) recapLog.removeFirst();
-
-        return true;
+        queueWriteLock.lock();
+        try {
+            recent.addLast(log);
+            if (recent.size() > maxSize) recent.removeFirst();
+            return true;
+        } finally {
+            queueWriteLock.unlock();
+        }
     }
 
     /**
@@ -97,14 +100,14 @@ public class RecapManager {
      * @return
      */
     private boolean writeToFile(String log) {
-        writeLock.lock();
+        fileWriteLock.lock();
         try (PrintWriter writer = new PrintWriter(new FileWriter(recapFile, true), true)) {
             writer.println(log);
             return true;
         } catch (IOException e) {
             plugin.getLogger().log(Level.SEVERE, "Failed to write to recap log!", e);
         } finally {
-            writeLock.unlock();
+            fileWriteLock.unlock();
         }
         return false;
     }
@@ -117,7 +120,9 @@ public class RecapManager {
      */
     private Deque<String> setupRecapQueue() {
         List<String> list = new ArrayList<>();
-        readLock.lock();
+        Deque<String> log = new LinkedList<>();
+
+        fileReadLock.lock();
         try (BufferedReader reader = new BufferedReader(
                 new InputStreamReader(new FileInputStream(recapFile), Charset.defaultCharset()))) {
             String line;
@@ -128,16 +133,12 @@ public class RecapManager {
             plugin.getLogger().log(Level.WARNING, "Error when trying to retrieve the logs " +
                     "from recap.txt! Printing StackTrace and disabling plugin!" + e);
             plugin.getServer().getPluginManager().disablePlugin(plugin);
-            return null;
+            return log;
         } finally {
-            readLock.unlock();
+            fileReadLock.unlock();
         }
 
-        // TODO make sure to get the last X entries, the newest should always be the latest so it
-        //  shows at the bottom of the chat window
-        Deque<String> log = new LinkedList<>();
         Collections.reverse(list);
-
         for (int i = 0; i < maxSize && i < list.size(); i++)
             log.addFirst(list.get(i));
 

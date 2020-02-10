@@ -36,14 +36,15 @@ public class RecapCommand implements CommandExecutor, TabCompleter {
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         // Display the last X recaps
         if (args.length == 0) {
-            recapMain.getRecapManager().getRecapLog().forEach(sender::sendMessage);
+            final List<String> list = recapMain.getRecapManager().getRecent();
+            list.forEach(sender::sendMessage);
             return true;
         }
 
         // Admins with the correct perms are allowed to reload
         if (args[0].equalsIgnoreCase("reload")) {
             if (sender instanceof Player && !sender.hasPermission("recap.reload")) {
-                sender.sendMessage(ChatColor.RED + "You do not have permission!");
+                sender.sendMessage(ChatColor.RED + "You do not have permission to reload!");
                 return false;
             }
 
@@ -67,24 +68,28 @@ public class RecapCommand implements CommandExecutor, TabCompleter {
         // Save the arguments as a string to add to the recap log
         String log = recapMain.getRecapManager().getLogString(sender.getName(),
                 StringUtils.join(args, ' '));
-        recapMain.getRecapManager().writeLog(log, success -> {
-            if (success) {
+        recapMain.getRecapManager().writeLog(log, (toFile, toQueue) -> {
+            if (toFile && toQueue) {
                 // notify all parties
                 if (notify) {
                     for (Player player : Bukkit.getOnlinePlayers())
                         if (player.hasPermission("recap.notify")) {
-                            // TODO
-//                            player.sendMessage(ChatColor.GREEN + "[RECAP] " + recapLog.getFirst());
+                            player.sendMessage(ChatColor.GREEN + "[RECAP] " + log);
                         }
                 } else {
-                    // inform only the sender & send recap
+                    // inform only the sender
+                    sender.sendMessage(ChatColor.GREEN + "[RECAP] " + log);
                 }
                 // Always notify the console
                 recapMain.getLogger().log(Level.INFO, log);
+            } else if (!toFile) {
+                // TODO
+                sender.sendMessage(ChatColor.RED + "Failed to write log to file!");
+                recapMain.getLogger().log(Level.WARNING, "Failed to write log to file!");
             } else {
                 // TODO
-                sender.sendMessage(ChatColor.RED + "ERROR MESSAGE HERE PLS");
-                recapMain.getLogger().log(Level.WARNING, "ERROR MESSAGE HERE PLS");
+                sender.sendMessage(ChatColor.RED + "Failed to write log to memory!");
+                recapMain.getLogger().log(Level.WARNING, "Failed to write log to runtime memory!");
             }
         });
         return true;

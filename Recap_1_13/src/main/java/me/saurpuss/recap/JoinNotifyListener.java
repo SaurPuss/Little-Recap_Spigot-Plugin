@@ -22,6 +22,6 @@ public class JoinNotifyListener implements Listener {
         if (!event.getPlayer().hasPermission("recap.notify")) return;
 
         Player player = event.getPlayer();
-        recapMain.getRecapManager().getRecapLog().forEach(player::sendMessage);
+        recapMain.getRecapManager().getRecent().forEach(player::sendMessage);
     }
 }
