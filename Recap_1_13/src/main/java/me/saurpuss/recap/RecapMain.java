@@ -10,7 +10,6 @@ import java.util.logging.Level;
 public final class RecapMain extends JavaPlugin {
 
     private RecapManager recapManager;
-    private final int spigotID = -1; // TODO on first upload
 
     /**
      * Recap startup logic:
@@ -38,6 +37,8 @@ public final class RecapMain extends JavaPlugin {
         recapManager = new RecapManager(this);
 
         // Poll the spigot site for latest plugin version number
+        // TODO on first upload
+        int spigotID = -1;
         new UpdateChecker(this, spigotID).getVersion(version -> {
             if (!getDescription().getVersion().equalsIgnoreCase(version)) {
                 getLogger().log(Level.INFO, "Version " + version  + " is now available!");

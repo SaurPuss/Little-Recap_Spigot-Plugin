@@ -10,10 +10,6 @@
 # https://howtodoinjava.com/java/date-time/java8-datetimeformatter-example/
 date-format: "MMM dd"
 
-# You can either override the recap log with the current list loaded in the plugin runtime, or
-# append it as you go. Either way the result will be saved in the config folder as recap.txt.
-append-log: true
-
 # Append the recap log with the username of the person making the log
 log-author: true
 
@@ -28,6 +24,3 @@ allow-colors: true
 
 # How many entries should be listed when checking the last recap
 max-size: 10
-
-# Display recap log from first to last entry (newest at the top)
-fifo-sorting: true

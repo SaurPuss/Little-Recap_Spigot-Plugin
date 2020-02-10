@@ -19,9 +19,11 @@ import java.util.logging.Level;
 public class RecapCommand implements CommandExecutor, TabCompleter {
 
     private RecapMain recapMain;
+    private boolean notify;
 
     public RecapCommand(RecapMain plugin) {
         recapMain = plugin;
+        notify = plugin.getConfig().getBoolean("notify-live");
     }
 
     /**
@@ -63,7 +65,28 @@ public class RecapCommand implements CommandExecutor, TabCompleter {
         }
 
         // Save the arguments as a string to add to the recap log
-        recapMain.getRecapManager().addRecap(sender, StringUtils.join(args, ' '));
+        String log = recapMain.getRecapManager().getLogString(sender.getName(),
+                StringUtils.join(args, ' '));
+        recapMain.getRecapManager().writeLog(log, success -> {
+            if (success) {
+                // notify all parties
+                if (notify) {
+                    for (Player player : Bukkit.getOnlinePlayers())
+                        if (player.hasPermission("recap.notify")) {
+                            // TODO
+//                            player.sendMessage(ChatColor.GREEN + "[RECAP] " + recapLog.getFirst());
+                        }
+                } else {
+                    // inform only the sender & send recap
+                }
+                // Always notify the console
+                recapMain.getLogger().log(Level.INFO, log);
+            } else {
+                // TODO
+                sender.sendMessage(ChatColor.RED + "ERROR MESSAGE HERE PLS");
+                recapMain.getLogger().log(Level.WARNING, "ERROR MESSAGE HERE PLS");
+            }
+        });
         return true;
     }
 

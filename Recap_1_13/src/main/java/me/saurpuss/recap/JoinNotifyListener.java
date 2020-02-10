@@ -14,8 +14,8 @@ public class JoinNotifyListener implements Listener {
     }
 
     /**
-     * PlayerJoinEvent Listener that displays the last recap log to players with the recap.notify
-     * permission.
+     * PlayerJoinEvent Listener that displays the last recap logs to players with the recap.notify
+     * permission. Requires "show-on-join" in config.yml to be true.
      */
     @EventHandler
     public void onJoin(PlayerJoinEvent event) {
