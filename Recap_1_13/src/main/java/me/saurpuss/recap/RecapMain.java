@@ -1,5 +1,6 @@
 package me.saurpuss.recap;
 
+import me.saurpuss.recap.util.UpdateChecker;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.logging.Level;
@@ -37,8 +38,7 @@ public final class RecapMain extends JavaPlugin {
         recapManager = new RecapManager(this);
 
         // Poll the spigot site for latest plugin version number
-        // TODO on first upload
-        int spigotID = -1;
+        int spigotID = -1; // TODO on first upload
         new UpdateChecker(this, spigotID).getVersion(version -> {
             if (!getDescription().getVersion().equalsIgnoreCase(version)) {
                 getLogger().log(Level.INFO, "Version " + version  + " is now available!");

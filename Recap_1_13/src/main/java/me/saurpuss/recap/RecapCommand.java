@@ -19,7 +19,7 @@ import java.util.logging.Level;
 public class RecapCommand implements CommandExecutor, TabCompleter {
 
     private RecapMain recapMain;
-    private boolean notify;
+    private final boolean notify;
 
     public RecapCommand(RecapMain plugin) {
         recapMain = plugin;
@@ -77,7 +77,7 @@ public class RecapCommand implements CommandExecutor, TabCompleter {
                             player.sendMessage(ChatColor.GREEN + "[RECAP] " + log);
                         }
                 } else {
-                    // inform only the sender
+                    // notify only the sender
                     sender.sendMessage(ChatColor.GREEN + "[RECAP] " + log);
                 }
                 // Always notify the console

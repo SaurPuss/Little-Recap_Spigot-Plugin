@@ -1,5 +1,6 @@
 package me.saurpuss.recap;
 
+import me.saurpuss.recap.util.FileWriteCallback;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -25,11 +26,13 @@ public class RecapManager {
     private final boolean logAuthor;
     private final boolean allowColors;
 
-    // Logging things
+    // Recap file things
     private final File recapFile;
     private final ReadWriteLock fileLock = new ReentrantReadWriteLock();
     private final Lock fileWriteLock = fileLock.writeLock();
     private final Lock fileReadLock = fileLock.readLock();
+
+    // Runtime recap
     private final ReadWriteLock queueLock = new ReentrantReadWriteLock(); // TODO do I need 2 locks?
     private final Lock queueWriteLock = queueLock.writeLock();
     private Deque<String> recent;
@@ -64,7 +67,8 @@ public class RecapManager {
     }
 
     public List<String> getRecent() {
-        final ArrayList<String> result = new ArrayList<>(recent);
+        final ArrayList<String> result;
+        result = new ArrayList<>(recent);
         return result;
     }
 

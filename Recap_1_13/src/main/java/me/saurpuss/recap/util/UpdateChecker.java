@@ -1,5 +1,6 @@
-package me.saurpuss.recap;
+package me.saurpuss.recap.util;
 
+import me.saurpuss.recap.RecapMain;
 import org.bukkit.Bukkit;
 
 import java.io.IOException;
