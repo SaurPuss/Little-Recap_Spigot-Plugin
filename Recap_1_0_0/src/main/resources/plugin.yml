@@ -4,7 +4,7 @@ main: me.saurpuss.recap.RecapMain
 api-version: 1.13
 prefix: RECAP
 author: SaurPuss
-description: Small /recap plugin
+description: Small /recap plugin for 1.13+
 website: https://github.com/SaurPuss/Recap-Plugin
 
 commands:

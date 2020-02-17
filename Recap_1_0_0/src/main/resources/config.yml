@@ -2,7 +2,7 @@
 #                  Welcome to the Recap config, set your preferences here!
 #=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-#
 # Default Log example: (date - username: message)
-# §cAUG 10 §7- §cZombiemold: §rThis is an example recap log!
+# §cAUG 10 §7- §cSaurPuss: §rThis is an example recap log!
 #
 # Formatting the time and date prefix of the log is done with Java 8's DateTimeFormatter class.
 # The default is 'MMM dd' resulting in 'AUG 10' if the log is generated on August 10 (server time)
