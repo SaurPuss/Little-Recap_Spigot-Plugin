@@ -10,6 +10,9 @@ import java.util.Scanner;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 
+/**
+ * Source: https://www.spigotmc.org/wiki/creating-an-update-checker-that-checks-for-updates/
+ */
 public class UpdateChecker {
 
     private final RecapMain plugin;

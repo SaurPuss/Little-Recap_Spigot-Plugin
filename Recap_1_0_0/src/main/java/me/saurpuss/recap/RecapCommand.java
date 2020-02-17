@@ -83,15 +83,14 @@ public class RecapCommand implements CommandExecutor, TabCompleter {
                 // Always notify the console
                 recapMain.getLogger().log(Level.INFO, log);
             } else if (!toFile) {
-                // TODO
                 sender.sendMessage(ChatColor.RED + "Failed to write log to file!");
                 recapMain.getLogger().log(Level.WARNING, "Failed to write log to file!");
             } else {
-                // TODO
                 sender.sendMessage(ChatColor.RED + "Failed to write log to memory!");
                 recapMain.getLogger().log(Level.WARNING, "Failed to write log to runtime memory!");
             }
         });
+
         return true;
     }
 

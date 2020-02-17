@@ -7,10 +7,13 @@ import org.bukkit.configuration.file.FileConfiguration;
 
 import java.io.*;
 import java.nio.charset.Charset;
-import java.time.*;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.concurrent.locks.*;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.logging.Level;
 
 /**
@@ -33,7 +36,7 @@ public class RecapManager {
     private final Lock fileReadLock = fileLock.readLock();
 
     // Runtime recap
-    private final ReadWriteLock queueLock = new ReentrantReadWriteLock(); // TODO do I need 2 locks?
+    private final ReadWriteLock queueLock = new ReentrantReadWriteLock();
     private final Lock queueWriteLock = queueLock.writeLock();
     private Deque<String> recent;
 
@@ -100,8 +103,8 @@ public class RecapManager {
 
     /**
      * Add a line to the recap.txt file
-     * @param log
-     * @return
+     * @param log date, author (optional), and message to be saved into the file
+     * @return true if successful
      */
     private boolean writeToFile(String log) {
         fileWriteLock.lock();
